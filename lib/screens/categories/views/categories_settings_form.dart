@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ordering_app/widgets/g_button.dart';
@@ -16,8 +18,10 @@ class CategoriesSettingsForm extends StatefulWidget {
 
 class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
   final List _addSubCategory = [];
+  final _mainCategoryField = TextEditingController();
   final _subCategoryField = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String _currentIndex = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +32,7 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
           child: Column(
             children: [
               GTextField(
-                editingController: _subCategoryField,
+                editingController: _mainCategoryField,
                 changeFn: (value) {},
                 fieldLabel: 'Enter a category',
                 isObsureText: false,
@@ -52,7 +56,10 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        formBottomSheet(context);
+                        _currentIndex = '';
+                        _subCategoryField.text = '';
+                        setState(() {});
+                        formBottomSheet(context, 0);
                       },
                       child: const Text('Add Sub category')),
                 ],
@@ -69,7 +76,7 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                       ? SettingListCard(
                           listItems: [
                             Text(
-                              _addSubCategory[index].toString(),
+                              _addSubCategory[index]['sub_category'].toString(),
                               style: const TextStyle(
                                   fontSize: 18.0, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.left,
@@ -78,12 +85,12 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                           actionItems: [
                             IButton(
                                 onClick: () async {
-                                  if (kDebugMode) {
-                                    print(_addSubCategory[index]);
-                                  }
+                                  if (kDebugMode) {}
                                   _subCategoryField.text =
-                                      _addSubCategory[index];
-                                  formBottomSheet(context);
+                                      _addSubCategory[index]['sub_category'];
+                                  _currentIndex = _addSubCategory[index]['id'];
+                                  formBottomSheet(
+                                      context, _addSubCategory[index]['id']);
                                 },
                                 icon: const Icon(Icons.edit)),
                             IButton(
@@ -135,7 +142,7 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
     );
   }
 
-  Future<dynamic> formBottomSheet(BuildContext context) {
+  Future<dynamic> formBottomSheet(BuildContext context, index) {
     return showModalBottomSheet(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -143,7 +150,7 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
         context: context,
         builder: (__) {
           return Padding(
-            padding: const EdgeInsets.all(80.0),
+            padding: const EdgeInsets.all(12.0),
             child: Form(
                 key: _formKey,
                 child: Column(
@@ -166,16 +173,41 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                         btnText: 'Add',
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            _addSubCategory.add(_subCategoryField.text);
+                            if (_currentIndex != '') {
+                              _addSubCategory.map((e) => (e['id'] ==
+                                      _currentIndex)
+                                  ? e['sub_category'] = _subCategoryField.text
+                                  : '');
+                              _addSubCategory[_addSubCategory.indexWhere(
+                                  (element) =>
+                                      element['id'] == _currentIndex)] = {
+                                'id': _currentIndex,
+                                'sub_category': _subCategoryField.text
+                              };
+                              print(_addSubCategory);
+                            } else {
+                              _addSubCategory.add({
+                                'id': _currentIndex != ''
+                                    ? _currentIndex
+                                    : randomNumber(),
+                                'sub_category': _subCategoryField.text
+                              });
+                            }
                             setState(() {});
+
                             _formKey.currentState!.reset();
                             Navigator.of(context).pop();
                           }
                         },
-                        color: Colors.blue)
+                        color: Colors.blue),
                   ],
                 )),
           );
         });
+  }
+
+  String randomNumber() {
+    var random = Random().nextInt(10) + 5;
+    return '000A$random';
   }
 }
