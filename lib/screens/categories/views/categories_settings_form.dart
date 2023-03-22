@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ordering_app/models/categories/categories_edit_form_model.dart';
 import 'package:ordering_app/models/common_response_model.dart';
 import 'package:ordering_app/services/category/main_category.dart';
 import 'package:ordering_app/widgets/g_button.dart';
@@ -21,12 +22,13 @@ class CategoriesSettingsForm extends StatefulWidget {
 }
 
 class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
-  final List _addSubCategory = [];
+  List<CategoryEditFormData> _addSubCategory = [];
   final _mainCategoryField = TextEditingController();
   final _categoryDesc = TextEditingController();
   final _subCategoryField = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _mainFormKey = GlobalKey<FormState>();
+  int? mainCategoryId;
   String? responseMessage = '';
   bool? isSuccess = false;
   String _currentIndex = '';
@@ -37,7 +39,10 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
       if (widget.categoryId != null) {
         final response =
             await CategoryRequest().getCategoriesById(widget.categoryId);
-        print(response);
+        mainCategoryId = response.mainCategoryId;
+        _mainCategoryField.text = response.mainCategoryName!;
+        _addSubCategory = response.categoryEditData;
+        setState(() {});
       }
     } on DioError catch (e) {}
   }
@@ -167,7 +172,8 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                               ? SettingListCard(
                                   listItems: [
                                     Text(
-                                      _addSubCategory[index]['sub_category']
+                                      _addSubCategory[index]
+                                          .subCategoryName
                                           .toString(),
                                       style: const TextStyle(
                                           fontSize: 18.0,
@@ -181,11 +187,13 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                                           if (kDebugMode) {}
                                           _subCategoryField.text =
                                               _addSubCategory[index]
-                                                  ['sub_category'];
-                                          _currentIndex =
-                                              _addSubCategory[index]['id'];
-                                          formBottomSheet(context,
-                                              _addSubCategory[index]['id']);
+                                                  .subCategoryName
+                                                  .toString();
+                                          _currentIndex = _addSubCategory[index]
+                                              .subCategoryId
+                                              .toString();
+                                          formBottomSheet(
+                                              context, _currentIndex);
                                         },
                                         icon: const Icon(Icons.edit)),
                                     IButton(
@@ -256,18 +264,21 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                     onPressed: () async {
                       if (_mainFormKey.currentState!.validate()) {
                         if (kDebugMode) {
-                          print(_addSubCategory.toList());
-                          print(_mainCategoryField.text);
-                          print(_categoryDesc.text);
-                        }
-                        await saveCategory();
-                        if (!mounted) return;
-                        showSnackBar(context, responseMessage.toString());
-                        if (isSuccess!) {
-                          Future.delayed(const Duration(seconds: 2), () {
-                            Navigator.pop(context, true);
+                          _addSubCategory.map((e) {
+                            if (kDebugMode) {
+                              print(e);
+                              print(e.toJson());
+                            }
                           });
                         }
+                        // await saveCategory();
+                        // if (!mounted) return;
+                        // showSnackBar(context, responseMessage.toString());
+                        // if (isSuccess!) {
+                        //   Future.delayed(const Duration(seconds: 2), () {
+                        //     Navigator.pop(context, true);
+                        //   });
+                        // }
                       }
                     }),
               ),
@@ -309,25 +320,20 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                         btnText: 'Add',
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            if (_currentIndex != '') {
-                              _addSubCategory.map((e) => (e['id'] ==
-                                      _currentIndex)
-                                  ? e['sub_category'] = _subCategoryField.text
-                                  : '');
-                              _addSubCategory[_addSubCategory.indexWhere(
-                                  (element) =>
-                                      element['id'] == _currentIndex)] = {
-                                'id': _currentIndex,
-                                'sub_category': _subCategoryField.text
-                              };
-                              print(_addSubCategory);
-                            } else {
-                              _addSubCategory.add({
-                                'id': _currentIndex != ''
-                                    ? _currentIndex
-                                    : randomNumber(),
-                                'sub_category': _subCategoryField.text
+                            if (index != 0) {
+                              var i = _addSubCategory.indexWhere((element) {
+                                return element.subCategoryId ==
+                                    int.tryParse(index);
                               });
+                              _addSubCategory[i] = CategoryEditFormData(
+                                  subCategoryId: int.parse(_currentIndex),
+                                  subCategoryName: _subCategoryField.text);
+                            } else {
+                              _currentIndex =
+                                  (index != 0 ? index : randomNumber());
+                              _addSubCategory.add(CategoryEditFormData(
+                                  subCategoryId: int.parse(_currentIndex),
+                                  subCategoryName: _subCategoryField.text));
                             }
                             setState(() {});
 
@@ -344,6 +350,6 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
 
   String randomNumber() {
     var random = Random().nextInt(10) + 5;
-    return '000A$random';
+    return '1111$random';
   }
 }
