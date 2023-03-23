@@ -58,7 +58,19 @@ class CategoryRequest {
   Future<CategoryEditFormModel> getCategoriesById(postData) async {
     try {
       final response = await Api().getRequest("/category/$postData", '');
+      print(response.data);
       return CategoryEditFormModel.fromJson(response.data);
+    } on DioError catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  /// Delete Sub Categories By Id
+  Future<CommonResponseModel> deleteSubCategoryData(deleteData) async {
+    try {
+      final response =
+          await Api().deleteRequest('/subcategory/delete', deleteData);
+      return CommonResponseModel.fromJson(response.data);
     } on DioError catch (e) {
       throw Exception(e);
     }

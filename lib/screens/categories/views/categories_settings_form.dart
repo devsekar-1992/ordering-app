@@ -23,6 +23,7 @@ class CategoriesSettingsForm extends StatefulWidget {
 
 class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
   List<CategoryEditFormData> _addSubCategory = [];
+  final List _subCategory = [];
   final _mainCategoryField = TextEditingController();
   final _categoryDesc = TextEditingController();
   final _subCategoryField = TextEditingController();
@@ -41,6 +42,7 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
             await CategoryRequest().getCategoriesById(widget.categoryId);
         mainCategoryId = response.mainCategoryId;
         _mainCategoryField.text = response.mainCategoryName!;
+        print(response.categoryEditData);
         _addSubCategory = response.categoryEditData;
         setState(() {});
       }
@@ -213,18 +215,33 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                                                               'Cancel')),
                                                       ElevatedButton(
                                                           onPressed: () async {
+                                                            var subCategoryId =
+                                                                _addSubCategory[
+                                                                        index]
+                                                                    .subCategoryId
+                                                                    .toString();
+                                                            if (kDebugMode) {
+                                                              print(subCategoryId
+                                                                  .startsWith(
+                                                                      '1111'));
+                                                            }
                                                             // final response =
-                                                            //     await ProductRequest()
-                                                            //         .deleteUomData(
-                                                            //             {'uom_id': uomId});
-                                                            // if (response.isSuccess!) {
-                                                            //   productListItems.removeWhere(
+                                                            //     await CategoryRequest()
+                                                            //         .deleteSubCategoryData({
+                                                            //   'sub_category_id':
+                                                            //       subCategoryId
+                                                            // });
+                                                            // if (response
+                                                            //     .isSuccess!) {
+                                                            //   _addSubCategory.removeWhere(
                                                             //       (element) =>
-                                                            //           element.productId ==
-                                                            //           productListItems[index]
-                                                            //               .productId);
+                                                            //           element
+                                                            //               .subCategoryId ==
+                                                            //           subCategoryId);
                                                             //   setState(() {});
-                                                            //   Navigator.of(context).pop();
+                                                            //   Navigator.of(
+                                                            //           context)
+                                                            //       .pop();
                                                             // }
                                                           },
                                                           child: const Text(
@@ -263,22 +280,17 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                     color: Colors.blue,
                     onPressed: () async {
                       if (_mainFormKey.currentState!.validate()) {
-                        if (kDebugMode) {
-                          _addSubCategory.map((e) {
-                            if (kDebugMode) {
-                              print(e);
-                              print(e.toJson());
-                            }
+                        for (var i = 0; i < _addSubCategory.length; i++) {
+                          _subCategory.add(_addSubCategory[i].toJson());
+                        }
+                        await saveCategory();
+                        if (!mounted) return;
+                        showSnackBar(context, responseMessage.toString());
+                        if (isSuccess!) {
+                          Future.delayed(const Duration(seconds: 2), () {
+                            Navigator.pop(context, true);
                           });
                         }
-                        // await saveCategory();
-                        // if (!mounted) return;
-                        // showSnackBar(context, responseMessage.toString());
-                        // if (isSuccess!) {
-                        //   Future.delayed(const Duration(seconds: 2), () {
-                        //     Navigator.pop(context, true);
-                        //   });
-                        // }
                       }
                     }),
               ),
