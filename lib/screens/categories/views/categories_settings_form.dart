@@ -11,6 +11,7 @@ import 'package:ordering_app/widgets/g_icon_button.dart';
 import 'package:ordering_app/widgets/g_setting_list_card.dart';
 import 'package:ordering_app/widgets/g_snack_bar.dart';
 import 'package:ordering_app/widgets/g_text.dart';
+import 'package:ordering_app/widgets/g_text_area.dart';
 
 class CategoriesSettingsForm extends StatefulWidget {
   final int? categoryId;
@@ -46,7 +47,9 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
         _addSubCategory = response.categoryEditData;
         setState(() {});
       }
-    } on DioError catch (e) {}
+    } on DioError catch (e) {
+      throw Exception(e);
+    }
   }
 
   /// Save Data
@@ -64,7 +67,9 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
         isSuccess = response.isSuccess;
       });
       // ignore: empty_catches
-    } catch (e) {}
+    } on DioError catch (e) {
+      throw Exception(e);
+    }
   }
 
   @override
@@ -123,22 +128,17 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                       const SizedBox(
                         height: 20,
                       ),
-                      TextFormField(
-                        controller: _categoryDesc,
-                        validator: (value) {
+                      GTextAreaField(
+                        editingController: _categoryDesc,
+                        changeFn: (value) {},
+                        fieldLabel: 'Enter a main category description',
+                        isObsureText: false,
+                        onValidate: (value) {
                           if (value == '') {
                             return 'Please add Category description';
                           }
                           return null;
                         },
-                        minLines: 1,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0))),
-                            labelText: 'Unit Description'),
                       ),
                       const SizedBox(
                         height: 20,
@@ -165,13 +165,13 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                       const SizedBox(
                         height: 30,
                       ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemCount: _addSubCategory.length,
-                        itemBuilder: (context, index) {
-                          return _addSubCategory.isNotEmpty
-                              ? SettingListCard(
+                      _addSubCategory.isNotEmpty
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.vertical,
+                              itemCount: _addSubCategory.length,
+                              itemBuilder: (context, index) {
+                                return SettingListCard(
                                   listItems: [
                                     Text(
                                       _addSubCategory[index]
@@ -220,29 +220,45 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                                                                         index]
                                                                     .subCategoryId
                                                                     .toString();
-                                                            if (kDebugMode) {
-                                                              print(subCategoryId
-                                                                  .startsWith(
-                                                                      '1111'));
+                                                            if (subCategoryId
+                                                                .startsWith(
+                                                                    '1111')) {
+                                                              _addSubCategory.removeWhere(
+                                                                  (element) =>
+                                                                      element
+                                                                          .subCategoryId ==
+                                                                      int.tryParse(
+                                                                          subCategoryId));
+                                                              setState(() {});
+                                                              if (!mounted) {
+                                                                return;
+                                                              }
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            } else {
+                                                              final response =
+                                                                  await CategoryRequest()
+                                                                      .deleteSubCategoryData({
+                                                                'sub_category_id':
+                                                                    subCategoryId
+                                                              });
+                                                              if (response
+                                                                  .isSuccess!) {
+                                                                _addSubCategory.removeWhere((element) =>
+                                                                    element
+                                                                        .subCategoryId ==
+                                                                    int.tryParse(
+                                                                        subCategoryId));
+                                                                setState(() {});
+                                                                if (!mounted) {
+                                                                  return;
+                                                                }
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              }
                                                             }
-                                                            // final response =
-                                                            //     await CategoryRequest()
-                                                            //         .deleteSubCategoryData({
-                                                            //   'sub_category_id':
-                                                            //       subCategoryId
-                                                            // });
-                                                            // if (response
-                                                            //     .isSuccess!) {
-                                                            //   _addSubCategory.removeWhere(
-                                                            //       (element) =>
-                                                            //           element
-                                                            //               .subCategoryId ==
-                                                            //           subCategoryId);
-                                                            //   setState(() {});
-                                                            //   Navigator.of(
-                                                            //           context)
-                                                            //       .pop();
-                                                            // }
                                                           },
                                                           child: const Text(
                                                               'Sure'))
@@ -253,12 +269,12 @@ class _CategoriesSettingsFormState extends State<CategoriesSettingsForm> {
                                         },
                                         icon: const Icon(Icons.delete))
                                   ],
-                                )
-                              : const Center(
-                                  child: Text('No sub category'),
                                 );
-                        },
-                      )
+                              },
+                            )
+                          : const Center(
+                              child: Text('No sub category'),
+                            ),
                     ],
                   ),
                 ),

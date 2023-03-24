@@ -92,19 +92,19 @@ class _CategorySettingsListState extends State<CategorySettingsList> {
                                             final categoryId =
                                                 categoryItems[index]
                                                     .pCategoryId;
-                                            // final response =
-                                            //     await ProductRequest()
-                                            //         .deleteUomData(
-                                            //             {'uom_id': uomId});
-                                            // if (response.isSuccess!) {
-                                            //   productListItems.removeWhere(
-                                            //       (element) =>
-                                            //           element.productId ==
-                                            //           productListItems[index]
-                                            //               .productId);
-                                            //   setState(() {});
-                                            //   Navigator.of(context).pop();
-                                            // }
+                                            final response =
+                                                await CategoryRequest()
+                                                    .deleteCategoryData({
+                                              'category_id': categoryId
+                                            });
+                                            if (response.isSuccess!) {
+                                              categoryItems.removeWhere(
+                                                  (element) =>
+                                                      element.pCategoryId ==
+                                                      categoryId);
+                                              setState(() {});
+                                              Navigator.of(context).pop();
+                                            }
                                           },
                                           child: const Text('Sure'))
                                     ],
