@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ordering_app/models/products/product_list_model.dart';
+import 'package:ordering_app/models/products/products_edit_form_model.dart';
 import 'package:ordering_app/models/uom/uom_common_model.dart';
 import 'package:ordering_app/models/uom/uom_list_model.dart';
 import 'package:ordering_app/services/api_client/api.dart';
@@ -43,11 +44,11 @@ class ProductRequest {
     }
   }
 
-  // Get Unit Information By Id
-  Future<UomListModel> getUnitById(postData) async {
+  /// Get Categories Info By Id
+  Future<ProductsEditFormModel> getProductsById(postData) async {
     try {
-      final response = await Api().postRequest('/uom/unit', postData);
-      return UomListModel.fromJson(response.data);
+      final response = await Api().getRequest("/category/$postData", '');
+      return ProductsEditFormModel.fromJson(response.data);
     } on DioError catch (e) {
       throw Exception(e);
     }

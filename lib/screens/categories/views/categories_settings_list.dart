@@ -103,6 +103,7 @@ class _CategorySettingsListState extends State<CategorySettingsList> {
                                                       element.pCategoryId ==
                                                       categoryId);
                                               setState(() {});
+                                              // ignore: use_build_context_synchronously
                                               Navigator.of(context).pop();
                                             }
                                           },
