@@ -60,6 +60,7 @@ class _ProductFormState extends State<ProductForm> {
       responseMessage = response.msg;
       _brandItems = response.brandItems;
       _subCategoryItems = response.subCategoryItems;
+      setState(() {});
     } on DioError catch (e) {
       throw Exception(e);
     }
@@ -79,6 +80,8 @@ class _ProductFormState extends State<ProductForm> {
 
   // Load Brand in dropdownitems
   List<DropdownMenuItem<int>> _buildBrandItems() {
+    print('Load Brands');
+    print(_brandItems);
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
     for (var i = 0; i < _brandItems.length; i++) {
       items.add(DropdownMenuItem(
@@ -151,10 +154,18 @@ class _ProductFormState extends State<ProductForm> {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
+                      GDropdown(
+                          dropdownMenuItemList: _buildBrandItems(),
+                          dropdownLabel: 'Brand',
+                          onChanged: (value) {},
+                          selectedValue: 1),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       GTextField(
                         editingController: _mainProductField,
                         changeFn: (value) {},
-                        fieldLabel: 'Enter a product name',
+                        fieldLabel: 'Product name',
                         isObsureText: false,
                         onValidate: (value) {
                           if (value == '') {
@@ -163,6 +174,14 @@ class _ProductFormState extends State<ProductForm> {
                           return null;
                         },
                       ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      GDropdown(
+                          dropdownMenuItemList: _buildSubCategory(),
+                          dropdownLabel: 'Category',
+                          onChanged: (value) {},
+                          selectedValue: 1),
                       const SizedBox(
                         height: 20,
                       ),
@@ -367,16 +386,6 @@ class _ProductFormState extends State<ProductForm> {
                         return null;
                       },
                     ),
-                    GDropdown(
-                        dropdownMenuItemList: _buildSubCategory(),
-                        dropdownLabel: 'Sub Category',
-                        onChanged: (value) {},
-                        selectedValue: 1),
-                    GDropdown(
-                        dropdownMenuItemList: _buildBrandItems(),
-                        dropdownLabel: 'Brand Name',
-                        onChanged: (value) {},
-                        selectedValue: 1),
                     ElevBtn(
                         btnText: 'Add',
                         onPressed: () {
