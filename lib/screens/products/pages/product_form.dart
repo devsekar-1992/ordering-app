@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ordering_app/models/picklist/picklist_model.dart';
 import 'package:ordering_app/models/products/products_edit_form_model.dart';
 import 'package:ordering_app/services/category/main_category.dart';
 import 'package:ordering_app/services/generic/generic.dart';
 import 'package:ordering_app/services/products/products.dart';
 import 'package:ordering_app/widgets/g_button.dart';
+import 'package:ordering_app/widgets/g_dropdown.dart';
 import 'package:ordering_app/widgets/g_icon_button.dart';
 import 'package:ordering_app/widgets/g_setting_list_card.dart';
 import 'package:ordering_app/widgets/g_snack_bar.dart';
@@ -23,7 +25,8 @@ class ProductForm extends StatefulWidget {
 
 class _ProductFormState extends State<ProductForm> {
   List<ProductEditFormData> _addSubCategory = [];
-  final List _subCategory = [];
+  List<SubCategory> _subCategoryItems = [];
+  List<Brand> _brandItems = [];
   final _mainProductField = TextEditingController();
   final _subCategoryField = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -47,6 +50,43 @@ class _ProductFormState extends State<ProductForm> {
     } on DioError catch (e) {
       throw Exception(e);
     }
+  }
+
+  /// Load Picklist Data
+  void loadPicklistData() async {
+    try {
+      final response = await GenericRequest().getPicklistData();
+      isSuccess = response.isSuccess;
+      responseMessage = response.msg;
+      _brandItems = response.brandItems;
+      _subCategoryItems = response.subCategoryItems;
+    } on DioError catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  //Load Subcategory in dropdownitems
+  List<DropdownMenuItem<int>> _buildSubCategory() {
+    List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    for (var i = 0; i < _subCategoryItems.length; i++) {
+      items.add(DropdownMenuItem(
+        value: _subCategoryItems[i].subCategoryId,
+        child: Text(_subCategoryItems[i].subCategoryName.toString()),
+      ));
+    }
+    return items;
+  }
+
+  // Load Brand in dropdownitems
+  List<DropdownMenuItem<int>> _buildBrandItems() {
+    List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    for (var i = 0; i < _brandItems.length; i++) {
+      items.add(DropdownMenuItem(
+        value: _brandItems[i].brandId,
+        child: Text(_brandItems[i].brandName.toString()),
+      ));
+    }
+    return items;
   }
 
   /// Save Data
@@ -73,7 +113,7 @@ class _ProductFormState extends State<ProductForm> {
   void initState() {
     super.initState();
     showFormInfo();
-    GenericRequest().getPicklistData();
+    loadPicklistData();
   }
 
   @override
@@ -114,11 +154,11 @@ class _ProductFormState extends State<ProductForm> {
                       GTextField(
                         editingController: _mainProductField,
                         changeFn: (value) {},
-                        fieldLabel: 'Enter a main category',
+                        fieldLabel: 'Enter a product name',
                         isObsureText: false,
                         onValidate: (value) {
                           if (value == '') {
-                            return 'Please enter a main category';
+                            return 'Please enter a product name';
                           }
                           return null;
                         },
@@ -130,7 +170,7 @@ class _ProductFormState extends State<ProductForm> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'List Of Sub Categories',
+                            'List Of Product Items',
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
@@ -142,7 +182,7 @@ class _ProductFormState extends State<ProductForm> {
                                 setState(() {});
                                 formBottomSheet(context, 0);
                               },
-                              child: const Text('Add Sub category')),
+                              child: const Text('Add Product Items')),
                         ],
                       ),
                       const SizedBox(
@@ -327,6 +367,16 @@ class _ProductFormState extends State<ProductForm> {
                         return null;
                       },
                     ),
+                    GDropdown(
+                        dropdownMenuItemList: _buildSubCategory(),
+                        dropdownLabel: 'Sub Category',
+                        onChanged: (value) {},
+                        selectedValue: 1),
+                    GDropdown(
+                        dropdownMenuItemList: _buildBrandItems(),
+                        dropdownLabel: 'Brand Name',
+                        onChanged: (value) {},
+                        selectedValue: 1),
                     ElevBtn(
                         btnText: 'Add',
                         onPressed: () {
