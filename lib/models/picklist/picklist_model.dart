@@ -5,6 +5,7 @@ class PicklistModel {
   bool? isSuccess;
   List<SubCategory> subCategoryItems = [];
   List<Brand> brandItems = [];
+  List<Uom> uomItems = [];
   PicklistModel(
       {this.msg,
       this.isSuccess,
@@ -23,7 +24,11 @@ class PicklistModel {
               value['brand'].forEach((v) => {
                     brandItems.add(Brand(
                         brandId: v['brand_id'], brandName: v['brand_name']))
-                  })
+                  }),
+              value['uom'].forEach((v) => {
+                    uomItems
+                        .add(Uom(uomId: v['uom_id'], uomName: v['uom_name']))
+                  }),
             });
       }
     }
@@ -47,4 +52,13 @@ class Brand {
   Brand({required this.brandId, required this.brandName});
   factory Brand.fromJson(Map<String, dynamic> json) =>
       Brand(brandId: json['brand_id'], brandName: json['brand_name']);
+}
+
+/// Uom Class
+class Uom {
+  int? uomId;
+  String? uomName;
+  Uom({required this.uomId, required this.uomName});
+  factory Uom.fromJson(Map<String, dynamic> json) =>
+      Uom(uomId: json['uom_id'], uomName: json['uom_name']);
 }

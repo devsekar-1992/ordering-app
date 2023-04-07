@@ -27,8 +27,12 @@ class _ProductFormState extends State<ProductForm> {
   List<ProductEditFormData> _addSubCategory = [];
   List<SubCategory> _subCategoryItems = [];
   List<Brand> _brandItems = [];
+  List<Uom> _uomItems = [];
   final _mainProductField = TextEditingController();
   final _subCategoryField = TextEditingController();
+  bool isCgst = false;
+  bool isSgst = false;
+  final _hsnCode = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _mainFormKey = GlobalKey<FormState>();
   int? mainProductId;
@@ -60,6 +64,7 @@ class _ProductFormState extends State<ProductForm> {
       responseMessage = response.msg;
       _brandItems = response.brandItems;
       _subCategoryItems = response.subCategoryItems;
+      _uomItems = response.uomItems;
       setState(() {});
     } on DioError catch (e) {
       throw Exception(e);
@@ -80,13 +85,26 @@ class _ProductFormState extends State<ProductForm> {
 
   // Load Brand in dropdownitems
   List<DropdownMenuItem<int>> _buildBrandItems() {
-    print('Load Brands');
-    print(_brandItems);
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
     for (var i = 0; i < _brandItems.length; i++) {
       items.add(DropdownMenuItem(
         value: _brandItems[i].brandId,
         child: Text(_brandItems[i].brandName.toString()),
+      ));
+    }
+    return items;
+  }
+
+// Load Brand in dropdownitems
+  List<DropdownMenuItem<int>> _buildUomItems() {
+    if (kDebugMode) {
+      print(_uomItems);
+    }
+    List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    for (var i = 0; i < _uomItems.length; i++) {
+      items.add(DropdownMenuItem(
+        value: _uomItems[i].uomId,
+        child: Text(_uomItems[i].uomName.toString()),
       ));
     }
     return items;
@@ -315,7 +333,7 @@ class _ProductFormState extends State<ProductForm> {
                               },
                             )
                           : const Center(
-                              child: Text('No sub category'),
+                              child: Text('No Product Items'),
                             ),
                     ],
                   ),
@@ -371,7 +389,6 @@ class _ProductFormState extends State<ProductForm> {
             child: Form(
                 key: _formKey,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GTextField(
@@ -385,6 +402,53 @@ class _ProductFormState extends State<ProductForm> {
                         }
                         return null;
                       },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GDropdown(
+                        dropdownMenuItemList: _buildUomItems(),
+                        dropdownLabel: 'Unit of measurement',
+                        onChanged: (value) {},
+                        selectedValue: 1),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GTextField(
+                      editingController: _hsnCode,
+                      changeFn: (value) {},
+                      fieldLabel: 'HSN Code',
+                      isObsureText: false,
+                      onValidate: (value) {
+                        if (value == '') {
+                          return 'Please enter a product details';
+                        }
+                        return null;
+                      },
+                    ),
+                    Row(
+                      children: [
+                        Switch(
+                          value: isCgst,
+                          onChanged: (value) {
+                            isCgst = value;
+                            setState(() {});
+                          },
+                        ),
+                        const Text('Is Cgst?'),
+                        Switch.adaptive(
+                          value: isSgst,
+                          onChanged: (value) {
+                            setState(() {
+                              isSgst = value;
+                            });
+                            if (kDebugMode) {
+                              print(isSgst);
+                            }
+                          },
+                        ),
+                        const Text('Is Sgst?'),
+                      ],
                     ),
                     ElevBtn(
                         btnText: 'Add',

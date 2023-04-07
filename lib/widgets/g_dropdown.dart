@@ -24,6 +24,11 @@ class _GDropdownState extends State<GDropdown> {
       items: widget.dropdownMenuItemList,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
+          enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderSide: BorderSide(color: Colors.black, width: 1)),
+          focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black, width: 1)),
           labelStyle: const TextStyle(color: Colors.blue),
           labelText: widget.dropdownLabel),
       value: widget.selectedValue,
