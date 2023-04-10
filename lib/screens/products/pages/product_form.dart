@@ -13,6 +13,7 @@ import 'package:ordering_app/widgets/g_dropdown.dart';
 import 'package:ordering_app/widgets/g_icon_button.dart';
 import 'package:ordering_app/widgets/g_setting_list_card.dart';
 import 'package:ordering_app/widgets/g_snack_bar.dart';
+import 'package:ordering_app/widgets/g_switcher.dart';
 import 'package:ordering_app/widgets/g_text.dart';
 
 class ProductForm extends StatefulWidget {
@@ -30,6 +31,9 @@ class _ProductFormState extends State<ProductForm> {
   List<Uom> _uomItems = [];
   final _mainProductField = TextEditingController();
   final _subCategoryField = TextEditingController();
+  String? uomPicklist;
+  String? brandPicklist;
+  String? categoryPicklist;
   bool isCgst = false;
   bool isSgst = false;
   final _hsnCode = TextEditingController();
@@ -175,8 +179,11 @@ class _ProductFormState extends State<ProductForm> {
                       GDropdown(
                           dropdownMenuItemList: _buildBrandItems(),
                           dropdownLabel: 'Brand',
-                          onChanged: (value) {},
-                          selectedValue: 1),
+                          onChanged: (value) {
+                            brandPicklist = value;
+                            setState(() {});
+                          },
+                          selectedValue: brandPicklist!),
                       const SizedBox(
                         height: 20,
                       ),
@@ -198,8 +205,11 @@ class _ProductFormState extends State<ProductForm> {
                       GDropdown(
                           dropdownMenuItemList: _buildSubCategory(),
                           dropdownLabel: 'Category',
-                          onChanged: (value) {},
-                          selectedValue: 1),
+                          onChanged: (value) {
+                            categoryPicklist = value;
+                            setState(() {});
+                          },
+                          selectedValue: categoryPicklist!),
                       const SizedBox(
                         height: 20,
                       ),
@@ -390,6 +400,7 @@ class _ProductFormState extends State<ProductForm> {
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GTextField(
                       editingController: _subCategoryField,
@@ -404,15 +415,18 @@ class _ProductFormState extends State<ProductForm> {
                       },
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     GDropdown(
                         dropdownMenuItemList: _buildUomItems(),
                         dropdownLabel: 'Unit of measurement',
-                        onChanged: (value) {},
-                        selectedValue: 1),
+                        onChanged: (value) {
+                          uomPicklist = value;
+                          setState(() {});
+                        },
+                        selectedValue: uomPicklist!),
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     GTextField(
                       editingController: _hsnCode,
@@ -428,32 +442,37 @@ class _ProductFormState extends State<ProductForm> {
                     ),
                     Row(
                       children: [
-                        Switch(
-                          value: isCgst,
-                          onChanged: (value) {
+                        GSwitcher(
+                          isSwitched: isCgst,
+                          changeEvent: (value) {
                             isCgst = value;
-                            setState(() {});
                           },
                         ),
-                        const Text('Is Cgst?'),
-                        Switch.adaptive(
-                          value: isSgst,
-                          onChanged: (value) {
-                            setState(() {
-                              isSgst = value;
-                            });
-                            if (kDebugMode) {
-                              print(isSgst);
-                            }
+                        const Text(
+                          'Is Cgst?',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        GSwitcher(
+                          isSwitched: isSgst,
+                          changeEvent: (value) {
+                            isSgst = value;
                           },
                         ),
-                        const Text('Is Sgst?'),
+                        const Text(
+                          'Is Sgst?',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                     ElevBtn(
                         btnText: 'Add',
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+                            if (kDebugMode) {
+                              print(_subCategoryField.text);
+                              print(uomPicklist);
+                              print(_hsnCode.text);
+                            }
                             if (index != 0) {
                               var i = _addSubCategory.indexWhere((element) {
                                 return element.productDetailId ==
