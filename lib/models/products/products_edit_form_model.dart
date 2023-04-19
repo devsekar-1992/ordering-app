@@ -44,5 +44,12 @@ class ProductEditFormData {
           hsnCode: json['p_hsn_code'],
           cgstEnable: json['is_cgst_enable'],
           sgstEnable: json['is_sgst_enable']);
-  //Map toJson() => {'id': subCategoryId, 'sub_category': subCategoryName};
+  Map toJson() => {
+        'item_detail_id': productDetailId,
+        'item_detail_name': productDetailName,
+        'hsn_code': hsnCode,
+        'uom_id': uomId,
+        'is_cgst_enable': cgstEnable,
+        'is_sgst_enable': sgstEnable
+      };
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:ordering_app/models/common_response_model.dart';
 import 'package:ordering_app/models/products/product_list_model.dart';
 import 'package:ordering_app/models/products/products_edit_form_model.dart';
 import 'package:ordering_app/models/uom/uom_common_model.dart';
@@ -60,6 +61,27 @@ class ProductRequest {
       final response = await Api().deleteRequest('/uom/delete', postData);
       return UomCommonModel.fromJson(response.data);
     } on DioError catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  /// Add Products
+  Future<CommonResponseModel> addProducts(postData) async {
+    try {
+      String? path = '';
+      dynamic response = '';
+      if (postData['uom_id'] == null) {
+        path = '/products/add';
+        response = await Api().postRequest(path, postData);
+      } else {
+        path = '/productts/update';
+        response = await Api().putRequest(path, postData);
+      }
+      return CommonResponseModel.fromJson(response.data);
+    } on DioError catch (e) {
+      if (kDebugMode) {
+        if (e.response?.statusCode == 401) {}
+      }
       throw Exception(e);
     }
   }

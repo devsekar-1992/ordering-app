@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class GDropdown extends StatefulWidget {
   final List<DropdownMenuItem<int>> dropdownMenuItemList;
   final String dropdownLabel;
-  final String selectedValue;
+  final int? selectedValue;
   final void Function(dynamic) onChanged;
   const GDropdown(
       {Key? key,
@@ -24,7 +24,6 @@ class _GDropdownState extends State<GDropdown> {
       items: widget.dropdownMenuItemList,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-          hintText: 'Sekar',
           enabledBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(color: Colors.black, width: 1)),

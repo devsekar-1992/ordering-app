@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ordering_app/models/common_response_model.dart';
 import 'package:ordering_app/models/picklist/picklist_model.dart';
 import 'package:ordering_app/models/products/products_edit_form_model.dart';
 import 'package:ordering_app/services/category/main_category.dart';
@@ -25,15 +26,16 @@ class ProductForm extends StatefulWidget {
 }
 
 class _ProductFormState extends State<ProductForm> {
+  final List subProductsItems = [];
   List<ProductEditFormData> _addSubCategory = [];
   List<SubCategory> _subCategoryItems = [];
   List<Brand> _brandItems = [];
   List<Uom> _uomItems = [];
   final _mainProductField = TextEditingController();
   final _subCategoryField = TextEditingController();
-  String? uomPicklist;
-  String? brandPicklist;
-  String? categoryPicklist;
+  int uomPicklist = 0;
+  int brandPicklist = 0;
+  int categoryPicklist = 0;
   bool isCgst = false;
   bool isSgst = false;
   final _hsnCode = TextEditingController();
@@ -78,6 +80,10 @@ class _ProductFormState extends State<ProductForm> {
   //Load Subcategory in dropdownitems
   List<DropdownMenuItem<int>> _buildSubCategory() {
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    items.add(const DropdownMenuItem(
+      value: 0,
+      child: Text('Select'),
+    ));
     for (var i = 0; i < _subCategoryItems.length; i++) {
       items.add(DropdownMenuItem(
         value: _subCategoryItems[i].subCategoryId,
@@ -90,6 +96,10 @@ class _ProductFormState extends State<ProductForm> {
   // Load Brand in dropdownitems
   List<DropdownMenuItem<int>> _buildBrandItems() {
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    items.add(const DropdownMenuItem(
+      value: 0,
+      child: Text('Select'),
+    ));
     for (var i = 0; i < _brandItems.length; i++) {
       items.add(DropdownMenuItem(
         value: _brandItems[i].brandId,
@@ -104,7 +114,12 @@ class _ProductFormState extends State<ProductForm> {
     if (kDebugMode) {
       print(_uomItems);
     }
+
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
+    items.add(const DropdownMenuItem(
+      value: 0,
+      child: Text('Select'),
+    ));
     for (var i = 0; i < _uomItems.length; i++) {
       items.add(DropdownMenuItem(
         value: _uomItems[i].uomId,
@@ -116,22 +131,23 @@ class _ProductFormState extends State<ProductForm> {
 
   /// Save Data
   Future<void> saveCategory() async {
-    // try {
-    //   CommonResponseModel response = await CategoryRequest().addCategories({
-    //     'category_id': widget.productId,
-    //     'category_name': _mainProductField.text,
-    //     'category_description': _categoryDesc.text,
-    //     'sub_categories': _addSubCategory.toList()
-    //   });
+    try {
+      CommonResponseModel response = await ProductRequest().addProducts({
+        'p_item_id': widget.productId,
+        'item_name': _mainProductField.text,
+        'category_id': categoryPicklist,
+        'company_id': brandPicklist,
+        'items': _addSubCategory.toList()
+      });
 
-    //   setState(() {
-    //     responseMessage = response.msg.toString();
-    //     isSuccess = response.isSuccess;
-    //   });
-    //   // ignore: empty_catches
-    // } on DioError catch (e) {
-    //   throw Exception(e);
-    // }
+      setState(() {
+        responseMessage = response.msg.toString();
+        isSuccess = response.isSuccess;
+      });
+      // ignore: empty_catches
+    } on DioError catch (e) {
+      throw Exception(e);
+    }
   }
 
   @override
@@ -183,7 +199,7 @@ class _ProductFormState extends State<ProductForm> {
                             brandPicklist = value;
                             setState(() {});
                           },
-                          selectedValue: brandPicklist!),
+                          selectedValue: brandPicklist),
                       const SizedBox(
                         height: 20,
                       ),
@@ -209,7 +225,7 @@ class _ProductFormState extends State<ProductForm> {
                             categoryPicklist = value;
                             setState(() {});
                           },
-                          selectedValue: categoryPicklist!),
+                          selectedValue: categoryPicklist),
                       const SizedBox(
                         height: 20,
                       ),
@@ -261,6 +277,19 @@ class _ProductFormState extends State<ProductForm> {
                                               _addSubCategory[index]
                                                   .productDetailName
                                                   .toString();
+                                          _hsnCode.text = _addSubCategory[index]
+                                              .hsnCode
+                                              .toString();
+                                          isCgst = (_addSubCategory[index]
+                                                      .cgstEnable) ==
+                                                  1
+                                              ? true
+                                              : false;
+                                          isSgst = (_addSubCategory[index]
+                                                      .sgstEnable) ==
+                                                  1
+                                              ? true
+                                              : false;
                                           _currentIndex = _addSubCategory[index]
                                               .productDetailId
                                               .toString();
@@ -367,7 +396,7 @@ class _ProductFormState extends State<ProductForm> {
                     onPressed: () async {
                       if (_mainFormKey.currentState!.validate()) {
                         for (var i = 0; i < _addSubCategory.length; i++) {
-                          //     _subCategory.add(_addSubCategory[i].toJson());
+                          subProductsItems.add(_addSubCategory[i].toJson());
                         }
                         await saveCategory();
                         if (!mounted) return;
@@ -424,7 +453,7 @@ class _ProductFormState extends State<ProductForm> {
                           uomPicklist = value;
                           setState(() {});
                         },
-                        selectedValue: uomPicklist!),
+                        selectedValue: uomPicklist),
                     const SizedBox(
                       height: 10,
                     ),
@@ -468,28 +497,33 @@ class _ProductFormState extends State<ProductForm> {
                         btnText: 'Add',
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            if (kDebugMode) {
-                              print(_subCategoryField.text);
-                              print(uomPicklist);
-                              print(_hsnCode.text);
-                            }
                             if (index != 0) {
                               var i = _addSubCategory.indexWhere((element) {
                                 return element.productDetailId ==
                                     int.tryParse(index);
                               });
-                              // _addSubCategory[i] = ProductEditFormData(
-                              //     subCategoryId: int.parse(_currentIndex),
-                              //     subCategoryName: _subCategoryField.text);
+                              if (kDebugMode) {
+                                print(isSgst);
+                              }
+                              _addSubCategory[i] = (ProductEditFormData(
+                                  productDetailId: int.parse(_currentIndex),
+                                  productDetailName: _subCategoryField.text,
+                                  cgstEnable: (isCgst) ? 1 : 0,
+                                  sgstEnable: (isSgst) ? 1 : 0,
+                                  uomId: uomPicklist,
+                                  hsnCode: _hsnCode.text));
                             } else {
                               _currentIndex =
                                   (index != 0 ? index : randomNumber());
-                              // _addSubCategory.add(CategoryEditFormData(
-                              //     subCategoryId: int.parse(_currentIndex),
-                              //     subCategoryName: _subCategoryField.text));
+                              _addSubCategory.add(ProductEditFormData(
+                                  productDetailId: int.parse(_currentIndex),
+                                  productDetailName: _subCategoryField.text,
+                                  cgstEnable: (isCgst) ? 1 : 0,
+                                  sgstEnable: (isSgst) ? 1 : 0,
+                                  uomId: uomPicklist,
+                                  hsnCode: _hsnCode.text));
                             }
                             setState(() {});
-
                             _formKey.currentState!.reset();
                             Navigator.of(context).pop();
                           }
