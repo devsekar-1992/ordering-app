@@ -113,10 +113,6 @@ class _ProductFormState extends State<ProductForm> {
 
 // Load Brand in dropdownitems
   List<DropdownMenuItem<int>> _buildUomItems() {
-    if (kDebugMode) {
-      print(_uomItems);
-    }
-
     List<DropdownMenuItem<int>> items = List.empty(growable: true);
     items.add(const DropdownMenuItem(
       value: 0,
@@ -507,9 +503,6 @@ class _ProductFormState extends State<ProductForm> {
                                 return element.productDetailId ==
                                     int.tryParse(index);
                               });
-                              if (kDebugMode) {
-                                print(isSgst);
-                              }
                               _addSubCategory[i] = (ProductEditFormData(
                                   productDetailId: int.parse(_currentIndex),
                                   productDetailName: _subCategoryField.text,

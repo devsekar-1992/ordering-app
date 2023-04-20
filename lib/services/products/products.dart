@@ -16,9 +16,6 @@ class ProductRequest {
 
       return productListModel;
     } on DioError catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
       throw Exception(e);
     }
   }
@@ -48,9 +45,6 @@ class ProductRequest {
   Future<ProductsEditFormModel> getProductsById(postData) async {
     try {
       final response = await Api().getRequest("/products/$postData", '');
-      if (kDebugMode) {
-        print(response.data);
-      }
       return ProductsEditFormModel.fromJson(response.data);
     } on DioError catch (e) {
       throw Exception(e);
