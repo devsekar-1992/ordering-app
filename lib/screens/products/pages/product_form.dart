@@ -274,7 +274,6 @@ class _ProductFormState extends State<ProductForm> {
                                   actionItems: [
                                     IButton(
                                         onClick: () async {
-                                          if (kDebugMode) {}
                                           _subCategoryField.text =
                                               _addSubCategory[index]
                                                   .productDetailName
@@ -292,6 +291,8 @@ class _ProductFormState extends State<ProductForm> {
                                                   1
                                               ? true
                                               : false;
+                                          uomPicklist =
+                                              _addSubCategory[index].uomId!;
                                           _currentIndex = _addSubCategory[index]
                                               .productDetailId
                                               .toString();
