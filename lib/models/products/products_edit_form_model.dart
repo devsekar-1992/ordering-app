@@ -11,8 +11,10 @@ class ProductsEditFormModel {
     if (json['data'] != null) {
       if (json['data'].length > 0) {
         json['data'].forEach((value) => {
+              mainProductId = value[0]['product_id'],
               mainProductName = value[0]['p_item_name'],
-              mainProductId = value[0]['category_id'],
+              productCategoryId = value[0]['category_id'],
+              productCompanyId = value[0]['company_id'],
               value[0]['items'].forEach(
                   (v) => {productEditData.add(ProductEditFormData.fromJson(v))})
             });

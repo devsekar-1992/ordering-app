@@ -108,13 +108,16 @@ class _ProductListState extends State<ProductList> {
                                           child: const Text('Cancel')),
                                       ElevatedButton(
                                           onPressed: () async {
-                                            final uomId =
+                                            final productId =
                                                 productListItems[index]
                                                     .productId;
                                             final response =
                                                 await ProductRequest()
-                                                    .deleteUomData(
-                                                        {'uom_id': uomId});
+                                                    .deleteProductData({
+                                              'id': productId,
+                                              'product_ref_type':
+                                                  'main_products'
+                                            });
                                             if (response.isSuccess!) {
                                               productListItems.removeWhere(
                                                   (element) =>

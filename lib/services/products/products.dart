@@ -4,7 +4,6 @@ import 'package:ordering_app/models/common_response_model.dart';
 import 'package:ordering_app/models/products/product_list_model.dart';
 import 'package:ordering_app/models/products/products_edit_form_model.dart';
 import 'package:ordering_app/models/uom/uom_common_model.dart';
-import 'package:ordering_app/models/uom/uom_list_model.dart';
 import 'package:ordering_app/services/api_client/api.dart';
 
 class ProductRequest {
@@ -45,10 +44,13 @@ class ProductRequest {
     }
   }
 
-  /// Get Categories Info By Id
+  /// Get Products Info By Id
   Future<ProductsEditFormModel> getProductsById(postData) async {
     try {
-      final response = await Api().getRequest("/category/$postData", '');
+      final response = await Api().getRequest("/products/$postData", '');
+      if (kDebugMode) {
+        print(response.data);
+      }
       return ProductsEditFormModel.fromJson(response.data);
     } on DioError catch (e) {
       throw Exception(e);
@@ -56,10 +58,10 @@ class ProductRequest {
   }
 
   /// Delete Uom
-  Future<UomCommonModel> deleteUomData(postData) async {
+  Future<CommonResponseModel> deleteProductData(postData) async {
     try {
-      final response = await Api().deleteRequest('/uom/delete', postData);
-      return UomCommonModel.fromJson(response.data);
+      final response = await Api().deleteRequest('/products/delete', postData);
+      return CommonResponseModel.fromJson(response.data);
     } on DioError catch (e) {
       throw Exception(e);
     }

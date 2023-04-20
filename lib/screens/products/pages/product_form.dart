@@ -54,6 +54,8 @@ class _ProductFormState extends State<ProductForm> {
             await ProductRequest().getProductsById(widget.productId);
         mainProductId = response.mainProductId;
         _mainProductField.text = response.mainProductName!;
+        brandPicklist = response.productCompanyId!;
+        categoryPicklist = response.productCategoryId!;
         _addSubCategory = response.productEditData;
         setState(() {});
       }
@@ -337,10 +339,12 @@ class _ProductFormState extends State<ProductForm> {
                                                                   .pop();
                                                             } else {
                                                               final response =
-                                                                  await CategoryRequest()
-                                                                      .deleteSubCategoryData({
-                                                                'sub_category_id':
-                                                                    subCategoryId
+                                                                  await ProductRequest()
+                                                                      .deleteProductData({
+                                                                'id':
+                                                                    subCategoryId,
+                                                                'product_ref_type':
+                                                                    'sub_products'
                                                               });
                                                               if (response
                                                                   .isSuccess!) {
